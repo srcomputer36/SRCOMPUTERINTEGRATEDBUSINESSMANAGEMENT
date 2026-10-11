@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SR Computer — Integrated Business Management</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--sidebar-width:270px;--sidebar-bg:#0f172a;--sidebar-active:#1e293b}
+*{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif}
+body{background:#f1f5f9;color:#0f172a}
+.sidebar{width:var(--sidebar-width);min-height:100vh;background:var(--sidebar-bg);color:#e2e8f0;position:fixed;left:0;top:0;bottom:0;overflow-y:auto;z-index:1040;transition:transform .3s}
+.sidebar .brand{padding:18px 20px;font-weight:700;font-size:18px;border-bottom:1px solid #1e293b;display:flex;align-items:center;gap:10px;color:#fff}
+.sidebar .nav-section{padding:14px 12px 4px;font-size:11px;letter-spacing:.08em;color:#94a3b8;text-transform:uppercase;font-weight:600}
+.sidebar .nav-link{color:#cbd5e1;padding:8px 12px;border-radius:8px;display:flex;align-items:center;gap:10px;font-size:13.5px;margin:2px 8px;cursor:pointer;text-decoration:none}
+.sidebar .nav-link:hover{background:var(--sidebar-active);color:#fff}
+.sidebar .nav-link.active{background:#2563eb;color:#fff;font-weight:600}
+.main{margin-left:var(--sidebar-width);min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1020}
+.card{border:0;box-shadow:0 1px 3px rgba(0,0,0,.07);border-radius:12px}
+.card-header{background:#fff;border-bottom:1px solid #e2e8f0;font-weight:600;font-size:14px}
+.stat-card{border-radius:14px;padding:16px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.07);height:100%}
+.stat-card .icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.badge-status{font-size:11px;padding:5px 8px;border-radius:20px;font-weight:600}
+.status-Receive{background:#fef3c7;color:#92400e}
+.status-SS\ Printed{background:#dbeafe;color:#1e40af}
+.status-Sign\ by\ SP\/DC{background:#e0e7ff;color:#3730a3}
+.status-MOFA\ Verification{background:#fce7f3;color:#9d174d}
+.status-Ready\ for\ Delivery{background:#dcfce7;color:#166534}
+.status-Delivered{background:#f8fafc;color:#334155;border:1px solid #e2e8f0}
+.table thead th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#64748b;font-weight:600;white-space:nowrap}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1035}
+.overlay.show{display:block}
+.section{display:none}
+.section.active{display:block}
+@media(max-width:992px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}}
+@media print{.sidebar,.topbar,.no-print{display:none!important}.main{margin-left:0!important}}
+</style>
+</head>
+<body>
+<div id="overlay" class="overlay"></div>
+<nav id="sidebar" class="sidebar">
+  <div class="brand"><i class="bi bi-building"></i> SR Computer</div>
+  <div class="px-2 py-2">
+    <div class="nav-section">Main</div>
+    <a class="nav-link active" data-page="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a class="nav-link" data-page="pcc_dashboard"><i class="bi bi-shield-check"></i> PCC Overview</a>
+
+    <div class="nav-section">Police Clearance</div>
+    <a class="nav-link" data-page="pcc_list"><i class="bi bi-folder2-open"></i> All Cases / Records</a>
+    <a class="nav-link" data-page="pcc_receive"><i class="bi bi-plus-circle"></i> Receive New Case</a>
+    <a class="nav-link" data-page="pcc_view"><i class="bi bi-eye"></i> Case Details (Demo)</a>
+    <a class="nav-link" data-page="pcc_reports"><i class="bi bi-file-earmark-bar-graph"></i> PCC Reports</a>
+
+    <div class="nav-section">Business Management</div>
+    <a class="nav-link" data-page="business_dashboard"><i class="bi bi-graph-up"></i> Business Dashboard</a>
+    <a class="nav-link" data-page="customers"><i class="bi bi-people"></i> Customers</a>
+    <a class="nav-link" data-page="suppliers"><i class="bi bi-truck"></i> Suppliers</a>
+    <a class="nav-link" data-page="income_expenses"><i class="bi bi-cash-stack"></i> Income & Expenses</a>
+    <a class="nav-link" data-page="cash_bank"><i class="bi bi-bank"></i> Cash & Bank</a>
+    <a class="nav-link" data-page="products"><i class="bi bi-box-seam"></i> Products & Inventory</a>
+    <a class="nav-link" data-page="sales"><i class="bi bi-receipt"></i> Sales</a>
+    <a class="nav-link" data-page="purchases"><i class="bi bi-bag-plus"></i> Purchases</a>
+
+    <div class="nav-section">Accounts & System</div>
+    <a class="nav-link" data-page="accounts"><i class="bi bi-journal-text"></i> Accounts & Ledger</a>
+    <a class="nav-link" data-page="reports"><i class="bi bi-bar-chart-line"></i> Reports</a>
+    <a class="nav-link" data-page="drive"><i class="bi bi-google"></i> Drive / Files</a>
+    <a class="nav-link" data-page="activity"><i class="bi bi-clock-history"></i> Activity Log</a>
+    <a class="nav-link" data-page="settings"><i class="bi bi-gear"></i> Settings</a>
+    <a class="nav-link" data-page="backup"><i class="bi bi-cloud-arrow-down"></i> Backup & Restore</a>
+
+    <div class="mt-3 px-3">
+      <div class="small text-white-50"><i class="bi bi-person-circle"></i> Admin •Demo</div>
+      <div class="small text-white-50 mt-2">SR Computer © 2026<br>Integrated Business</div>
+      <div class="mt-2 small"><span class="badge bg-success">Live Preview</span> <span class="badge bg-light text-dark">PHP/MySQL Ready</span></div>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-secondary d-lg-none" id="toggleBtn"><i class="bi bi-list"></i></button>
+      <h5 class="mb-0" id="pageTitle">Dashboard</h5>
+      <span class="badge bg-light text-dark border d-none d-md-inline">Asia/Dhaka • BDT ৳ • <span id="liveTime"></span></span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="small text-muted d-none d-sm-inline">admin</span>
+      <button class="btn btn-sm btn-outline-danger" onclick="alert('Demo — logout blocked')">Logout</button>
+    </div>
+  </div>
+  <div class="p-3 p-md-4">
+
+    <!-- DASHBOARD -->
+    <div id="sec-dashboard" class="section active">
+      <div class="alert alert-primary d-flex align-items-center gap-2"><i class="bi bi-info-circle"></i> <span><strong>প্রিভিউ মোড:</strong> এটি static demo — আসল PHP অ্যাপ হোস্টিং-এ MySQL সহ চালাতে <code>docs/INSTALLATION_GUIDE.md</code> দেখুন। Default login <code>admin / admin123</code></span></div>
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3"><div class="stat-card d-flex justify-content-between"><div><div class="text-muted small">মোট PCC কেস</div><div class="h3 fw-bold mt-1">1,248</div><div class="small text-success">আজ 12 টি • Delivered 301</div></div><div class="icon bg-primary text-white"><i class="bi bi-folder2"></i></div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card d-flex justify-content-between"><div><div class="text-muted small">মোট বাকি</div><div class="h3 fw-bold">৳ 84,500</div><div class="small text-muted">আদায় ৳ 2,15,000</div></div><div class="icon bg-warning"><i class="bi bi-cash"></i></div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card d-flex justify-content-between"><div><div class="text-muted small">Sales</div><div class="h3 fw-bold">৳ 3,42,000</div><div class="small text-muted">Products 48 • Low 3</div></div><div class="icon bg-success text-white"><i class="bi bi-receipt"></i></div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card d-flex justify-content-between"><div><div class="text-muted small">Net Position</div><div class="h6 fw-bold">Receivable ৳ 1,12,000</div><div class="small">Payable ৳ 42,000 • Cash ৳ 92,300</div></div><div class="icon bg-info text-white"><i class="bi bi-bank"></i></div></div></div>
+      </div>
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="card mb-3"><div class="card-header d-flex justify-content-between">PCC Status Overview <span class="small text-muted">Receive → Delivered</span></div><div class="card-body">
+            <div class="row g-2 mb-3">
+              <div class="col-6 col-md-4"><div class="border rounded p-2 text-center"><div class="small text-muted">Receive</div><div class="h5 mb-0">320</div></div></div>
+              <div class="col-6 col-md-4"><div class="border rounded p-2 text-center"><div class="small text-muted">SS Printed</div><div class="h5 mb-0">210</div></div></div>
+              <div class="col-6 col-md-4"><div class="border rounded p-2 text-center"><div class="small text-muted">Sign by SP/DC</div><div class="h5 mb-0">180</div></div></div>
+              <div class="col-6 col-md-4"><div class="border rounded p-2 text-center"><div class="small text-muted">MOFA Verification</div><div class="h5 mb-0">95</div></div></div>
+              <div class="col-6 col-md-4"><div class="border rounded p-2 text-center"><div class="small text-muted">Ready for Delivery</div><div class="h5 mb-0">142</div></div></div>
+              <div class="col-6 col-md-4"><div class="border rounded p-2 text-center bg-light"><div class="small text-muted">Delivered</div><div class="h5 mb-0">301</div></div></div>
+            </div>
+            <canvas id="chartStatus" height="110"></canvas>
+          </div></div>
+          <div class="card"><div class="card-header">Recent PCC Cases</div><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Tracking</th><th>Applicant</th><th>Mobile</th><th>Status</th><th>Due</th></tr></thead><tbody>
+            <tr><td class="fw-semibold">PCC-20241011-0001</td><td>মোঃ রহিম<br><small class="text-muted">Abdul Karim</small></td><td>01712345678</td><td><span class="badge badge-status status-Receive">Receive</span></td><td class="text-danger fw-bold">৳ 1,000.00</td></tr>
+            <tr><td class="fw-semibold">PCC-20241011-0002</td><td>Mst Fatima</td><td>01812345678</td><td><span class="badge badge-status status-MOFA Verification">MOFA Verification</span></td><td>৳ 0.00</td></tr>
+            <tr><td class="fw-semibold">PCC-20241011-0003</td><td>Karim Ullah</td><td>01911223344</td><td><span class="badge badge-status status-Delivered">Delivered</span></td><td>৳ 200.00</td></tr>
+          </tbody></table></div></div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card mb-3"><div class="card-header">Business Snapshot</div><div class="card-body">
+            <div class="d-flex justify-content-between py-2 border-bottom"><span>Customers</span><strong>86</strong></div>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span>Sales Total</span><strong>৳ 3,42,000</strong></div>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span>Purchases</span><strong>৳ 1,80,000</strong></div>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span>Expenses</span><strong>৳ 48,500</strong></div>
+            <div class="d-flex justify-content-between py-2"><span>Cash/Bank</span><strong>৳ 92,300</strong></div>
+            <div class="alert alert-warning mt-3 mb-0 py-2"><i class="bi bi-exclamation-triangle"></i> 3 product low stock</div>
+          </div></div>
+          <div class="card"><div class="card-header">Quick Actions</div><div class="card-body d-grid gap-2">
+            <button class="btn btn-primary" onclick="switchPage('pcc_receive')"><i class="bi bi-plus-lg"></i> New PCC Case</button>
+            <button class="btn btn-outline-primary" onclick="switchPage('sales')"><i class="bi bi-receipt"></i> New Sale</button>
+            <button class="btn btn-outline-success" onclick="switchPage('purchases')"><i class="bi bi-bag-plus"></i> New Purchase</button>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PCC DASHBOARD -->
+    <div id="sec-pcc_dashboard" class="section">
+      <div class="row g-3">
+        <div class="col-md-3"><div class="stat-card"><div class="text-muted small">মোট কেস</div><div class="h2">1,248</div><div class="small">৳ 3,10,500 collected</div></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="text-muted small">আজকের রিসিভ</div><div class="h2">12</div></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="text-muted small">মোট Due</div><div class="h2 text-danger">৳ 84,500</div></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="text-muted small">Delivered</div><div class="h2">301</div></div></div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-lg-8"><div class="card"><div class="card-header">Monthly Trend</div><div class="card-body"><canvas id="chartMonthly" height="100"></canvas></div></div></div>
+        <div class="col-lg-4"><div class="card"><div class="card-header">Top Districts</div><div class="list-group list-group-flush"><div class="list-group-item d-flex justify-content-between">Dhaka <span class="badge bg-primary">312</span></div><div class="list-group-item d-flex justify-content-between">Chattogram <span class="badge bg-primary">210</span></div><div class="list-group-item d-flex justify-content-between">Sylhet <span class="badge bg-primary">98</span></div></div></div></div>
+      </div>
+    </div>
+
+    <!-- PCC LIST -->
+    <div id="sec-pcc_list" class="section">
+      <div class="card mb-3"><div class="card-body p-2">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-3"><label class="form-label small">Search</label><input class="form-control" placeholder="Tracking / Name / Passport / Mobile" value="Rahim"></div>
+          <div class="col-md-2"><label class="form-label small">Status</label><select class="form-select"><option>All</option><option selected>Receive</option></select></div>
+          <div class="col-md-2"><label class="form-label small">From</label><input type="date" class="form-control" value="2024-10-01"></div>
+          <div class="col-md-2"><label class="form-label small">To</label><input type="date" class="form-control" value="2024-10-11"></div>
+          <div class="col-md-3 d-flex gap-2"><button class="btn btn-primary"><i class="bi bi-search"></i> Filter</button><button class="btn btn-success ms-auto"><i class="bi bi-plus-lg"></i> New</button></div>
+        </div>
+      </div></div>
+      <div class="alert alert-info py-2 d-flex justify-content-between"><span><strong>3</strong> selected</span><span><select class="form-select form-select-sm d-inline w-auto"><option>Change Status</option><option>SS Printed</option></select> <button class="btn btn-sm btn-primary">Apply Bulk</button></span></div>
+      <div class="card"><div class="card-header d-flex justify-content-between">Records (1,248) <span class="small text-muted">Page 1/62</span></div><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th><input type="checkbox" checked></th><th>Tracking</th><th>Applicant</th><th>Passport</th><th>Mobile</th><th>District</th><th>Status</th><th class="text-end">Due</th><th>Action</th></tr></thead><tbody>
+        <tr><td><input type="checkbox" checked></td><td class="fw-semibold">PCC-20241011-0001</td><td>মোঃ রহিম<br><small class="text-muted">Father: Abdul</small></td><td>A12345678</td><td>01712345678</td><td>Dhaka</td><td><span class="badge badge-status status-Receive">Receive</span></td><td class="text-end text-danger fw-bold">৳ 1,000.00</td><td><button class="btn btn-sm btn-outline-primary" onclick="switchPage('pcc_view')"><i class="bi bi-eye"></i></button></td></tr>
+        <tr><td><input type="checkbox"></td><td class="fw-semibold">PCC-20241011-0002</td><td>Mst Fatima</td><td>B98765432</td><td>01812345678</td><td>Chattogram</td><td><span class="badge badge-status status-SS Printed">SS Printed</span></td><td class="text-end">৳ 0.00</td><td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button></td></tr>
+        <tr><td><input type="checkbox" checked></td><td class="fw-semibold">PCC-20241011-0003</td><td>Karim Ullah</td><td>C11223344</td><td>01911223344</td><td>Sylhet</td><td><span class="badge badge-status status-Delivered">Delivered</span></td><td class="text-end">৳ 200.00</td><td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button></td></tr>
+      </tbody></table></div></div>
+    </div>
+
+    <!-- PCC RECEIVE -->
+    <div id="sec-pcc_receive" class="section">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between"><span><i class="bi bi-plus-circle"></i> নতুন PCC কেস রিসিভ / Receive New PCC Case</span><span class="small text-muted">Tracking auto-generate</span></div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <h6 class="text-primary">Applicant Information</h6>
+              <div class="mb-2"><label class="form-label">Applicant Name (English) *</label><input class="form-control" value="Md Rahim"></div>
+              <div class="mb-2"><label class="form-label">নাম (বাংলা)</label><input class="form-control" value="মোঃ রহিম"></div>
+              <div class="row g-2"><div class="col-6 mb-2"><label class="form-label">Father Name</label><input class="form-control" value="Abdul Karim"></div><div class="col-6 mb-2"><label class="form-label">Mother Name</label><input class="form-control" value="Rahima"></div></div>
+              <div class="mb-2"><label class="form-label">Mobile *</label><input class="form-control" value="01712345678"></div>
+              <div class="mb-2"><label class="form-label">Passport No</label><input class="form-control" value="A12345678"></div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-primary">Address & Reference</h6>
+              <div class="mb-2"><label class="form-label">Present Address</label><textarea class="form-control" rows="2">Tejgaon, Dhaka</textarea></div>
+              <div class="row g-2"><div class="col-6 mb-2"><label class="form-label">Thana</label><input class="form-control" value="Tejgaon"></div><div class="col-6 mb-2"><label class="form-label">District</label><select class="form-select"><option selected>Dhaka</option></select></div></div>
+              <div class="row g-2"><div class="col-6 mb-2"><label class="form-label">Reference Person</label><input class="form-control" value="Mr. X"></div><div class="col-6 mb-2"><label class="form-label">Reference Phone</label><input class="form-control" value="018..."></div></div>
+              <div class="mb-2"><label class="form-label">Attachment</label><input type="file" class="form-control"></div>
+            </div>
+          </div>
+          <hr>
+          <h6 class="text-primary">Payment</h6>
+          <div class="row g-2">
+            <div class="col-6 col-md-2"><label class="form-label">Govt Fee</label><input class="form-control" value="500"></div>
+            <div class="col-6 col-md-2"><label class="form-label">Service Charge</label><input class="form-control" value="1500"></div>
+            <div class="col-6 col-md-2"><label class="form-label">Other</label><input class="form-control" value="0"></div>
+            <div class="col-6 col-md-2"><label class="form-label">Paid</label><input class="form-control" value="500"></div>
+            <div class="col-md-4"><label class="form-label">Due</label><div class="form-control bg-light fw-bold text-danger">৳ 1,000.00 (auto)</div></div>
+          </div>
+          <div class="small text-muted mt-2">Govt & Other = direct cost, only Service = revenue (Master Prompt §8).</div>
+        </div>
+        <div class="card-footer d-flex gap-2"><button class="btn btn-primary" onclick="alert('Demo — saved! In real app: tracking PCC-20241011-XXXX generates')"><i class="bi bi-check-lg"></i> Save Case</button><button class="btn btn-outline-secondary" onclick="switchPage('pcc_list')">Cancel</button></div>
+      </div>
+    </div>
+
+    <!-- PCC VIEW -->
+    <div id="sec-pcc_view" class="section">
+      <div class="d-flex gap-2 mb-3"><button class="btn btn-sm btn-outline-secondary" onclick="switchPage('pcc_list')">← Back to List</button><h5 class="mb-0">PCC-20241011-0001 — Md Rahim</h5><span class="badge badge-status status-Receive ms-auto fs-6">Receive</span></div>
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="card mb-3"><div class="card-header">Applicant & Payment</div><div class="card-body row g-3">
+            <div class="col-md-6"><table class="table table-sm"><tr><th>Name</th><td>Md Rahim (মোঃ রহিম)</td></tr><tr><th>Father</th><td>Abdul Karim</td></tr><tr><th>Passport</th><td>A12345678</td></tr><tr><th>Mobile</th><td>01712345678</td></tr></table></div>
+            <div class="col-md-6"><table class="table table-sm"><tr><th>Govt Fee</th><td>৳ 500.00</td></tr><tr><th>Service</th><td>৳ 1,500.00</td></tr><tr><th>Total</th><td><strong>৳ 1,500.00</strong></td></tr><tr><th>Paid</th><td class="text-success">৳ 500.00</td></tr><tr><th>Due</th><td class="text-danger fw-bold">৳ 1,000.00</td></tr></table></div>
+          </div></div>
+          <div class="card"><div class="card-header">Payment History</div><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Date</th><th>Amount</th><th>Method</th></tr></thead><tbody><tr><td>11/10/2024</td><td>৳ 500.00</td><td>Cash</td></tr></tbody></table></div><div class="card-footer"><div class="input-group"><input class="form-control" placeholder="Add payment amount" value="1000"><button class="btn btn-success">Add Payment</button></div></div></div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card mb-3"><div class="card-header">Status Update</div><div class="card-body"><select class="form-select mb-2"><option>SS Printed</option><option>Sign by SP/DC</option><option>MOFA Verification</option><option>Ready for Delivery</option><option>Delivered</option></select><button class="btn btn-primary w-100">Update Status</button><hr><div class="small"><div class="border-start ps-2 mb-2" style="border-color:#3b82f6!important">— → <strong>Receive</strong><br><small class="text-muted">11/10/2024 by admin • Case created</small></div></div></div></div>
+          <div class="card"><div class="card-header">Delivery</div><div class="card-body"><input class="form-control mb-2" placeholder="Recipient Name" value="Md Rahim"><input class="form-control mb-2" placeholder="Phone" value="01712345678"><input type="date" class="form-control mb-2" value="2024-10-20"><button class="btn btn-success w-100">Mark Delivered</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PCC REPORTS -->
+    <div id="sec-pcc_reports" class="section">
+      <div class="card mb-3"><div class="card-body p-2"><div class="row g-2"><div class="col-md-2"><input type="date" class="form-control" value="2024-10-01"></div><div class="col-md-2"><input type="date" class="form-control" value="2024-10-11"></div><div class="col-md-3"><select class="form-select"><option>All Status</option><option>Delivered</option></select></div><div class="col-md-5 d-flex gap-2"><button class="btn btn-primary">Generate</button><button class="btn btn-outline-success">CSV</button><button class="btn btn-outline-dark" onclick="window.print()">Print</button></div></div></div></div>
+      <div class="row g-3 mb-3"><div class="col-md-3"><div class="stat-card"><div class="small">Records</div><div class="h4">42</div></div></div><div class="col-md-3"><div class="stat-card"><div class="small">Total Fee</div><div class="h4">৳ 63,000</div></div></div><div class="col-md-3"><div class="stat-card"><div class="small">Paid</div><div class="h4 text-success">৳ 48,000</div></div></div><div class="col-md-3"><div class="stat-card"><div class="small">Due</div><div class="h4 text-danger">৳ 15,000</div></div></div></div>
+      <div class="card"><div class="card-header">PCC Report 01/10/2024 → 11/10/2024</div><div class="table-responsive"><table class="table table-sm"><thead><tr><th>#</th><th>Tracking</th><th>Applicant</th><th>Status</th><th>Total</th><th>Due</th></tr></thead><tbody><tr><td>1</td><td>PCC-20241011-0001</td><td>Md Rahim</td><td>Receive</td><td>৳ 1,500</td><td>৳ 1,000</td></tr><tr><td>2</td><td>PCC-20241011-0002</td><td>Fatima</td><td>Delivered</td><td>৳ 1,500</td><td>৳ 0</td></tr></tbody></table></div></div>
+    </div>
+
+    <!-- BUSINESS DASHBOARD -->
+    <div id="sec-business_dashboard" class="section">
+      <div class="row g-3"><div class="col-md-4"><div class="stat-card"><div class="small">Sales (30d)</div><div class="h4">৳ 3,42,000</div></div></div><div class="col-md-4"><div class="stat-card"><div class="small">Purchases (30d)</div><div class="h4">৳ 1,80,000</div></div></div><div class="col-md-4"><div class="stat-card"><div class="small">Expenses (30d)</div><div class="h4">৳ 48,500</div></div></div></div>
+      <div class="card mt-3"><div class="card-header">Low Stock Alert</div><div class="table-responsive"><table class="table table-sm"><thead><tr><th>SKU</th><th>Product</th><th>Stock</th><th>Threshold</th></tr></thead><tbody><tr class="table-warning"><td>SKU-001</td><td>A4 Paper Rim</td><td>2</td><td>10</td></tr><tr><td>SKU-002</td><td>Ink Cartridge</td><td>12</td><td>5</td></tr></tbody></table></div></div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div id="sec-customers" class="section">
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="card"><div class="card-header">Customers</div><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Name</th><th>Phone</th><th>Due</th><th>View</th></tr></thead><tbody><tr><td><a href="#" onclick="switchPage('customers')">Md Rahim</a><br><small class="text-muted">01712345678</small></td><td>01712345678</td><td class="text-danger fw-bold">৳ 2,300</td><td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button></td></tr><tr><td>Karim Ullah</td><td>01911223344</td><td>৳ 0.00</td><td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button></td></tr></tbody></table></div></div>
+          <div class="card mt-3"><div class="card-header">Customer Ledger (Unified — PCC + Sales)</div><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Date</th><th>Source</th><th>Description</th><th class="text-end">Debit</th><th class="text-end">Credit</th></tr></thead><tbody><tr><td>11/10/2024</td><td>PCC</td><td>PCC-20241011-0001 — Service 1500</td><td class="text-end">1,500</td><td></td></tr><tr><td>11/10/2024</td><td>Payment</td><td>Cash received</td><td></td><td class="text-end text-success">500</td></tr><tr><td>10/10/2024</td><td>Sale</td><td>INV-S-20241010-0001 — 2 items</td><td class="text-end">2,800</td><td></td></tr></tbody></table></div></div>
+        </div>
+        <div class="col-lg-4"><div class="card"><div class="card-header">Add Customer</div><div class="card-body"><input class="form-control mb-2" placeholder="Name"><input class="form-control mb-2" placeholder="Phone 01..."><input class="form-control mb-2" placeholder="Email"><textarea class="form-control mb-2" placeholder="Address"></textarea><button class="btn btn-primary w-100">Add Customer</button></div></div></div>
+      </div>
+    </div>
+
+    <!-- SUPPLIERS -->
+    <div id="sec-suppliers" class="section">
+      <div class="row g-3"><div class="col-lg-8"><div class="card"><div class="card-header">Suppliers</div><div class="table-responsive"><table class="table"><thead><tr><th>Name</th><th>Phone</th><th>Payable</th></tr></thead><tbody><tr><td>Demo Supplier<br><small>ABC Traders</small></td><td>01800000001</td><td class="text-danger fw-bold">৳ 12,500</td></tr></tbody></table></div></div></div><div class="col-lg-4"><div class="card"><div class="card-header">Add Supplier</div><div class="card-body"><input class="form-control mb-2" placeholder="Name"><input class="form-control mb-2" placeholder="Company"><input class="form-control mb-2" placeholder="Phone"><button class="btn btn-primary w-100">Add</button></div></div></div></div>
+    </div>
+
+    <!-- INCOME_EXPENSES -->
+    <div id="sec-income_expenses" class="section">
+      <div class="row g-3"><div class="col-lg-4"><div class="card"><div class="card-header">Add Income / Expense</div><div class="card-body"><select class="form-select mb-2"><option>Income</option><option selected>Expense</option></select><input class="form-control mb-2" placeholder="Category" value="Office Rent"><input type="number" class="form-control mb-2" value="12000"><input type="date" class="form-control mb-2" value="2024-10-11"><select class="form-select mb-2"><option>Cash — ৳ 92,300</option></select><button class="btn btn-primary w-100">Save</button></div></div></div><div class="col-lg-8"><div class="row g-2 mb-3"><div class="col-4"><div class="stat-card"><div class="small">Income</div><div class="h5 text-success">৳ 48,000</div></div></div><div class="col-4"><div class="stat-card"><div class="small">Expense</div><div class="h5 text-danger">৳ 32,000</div></div></div><div class="col-4"><div class="stat-card"><div class="small">Net</div><div class="h5">৳ 16,000</div></div></div></div><div class="card"><div class="card-header">Expenses (Oct 2024)</div><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Date</th><th>Category</th><th>Amount</th></tr></thead><tbody><tr><td>11/10/2024</td><td>Office Rent</td><td>৳ 12,000</td></tr><tr><td>10/10/2024</td><td>Govt Fee (PCC)</td><td>৳ 500</td></tr></tbody></table></div></div></div></div>
+    </div>
+
+    <!-- CASH_BANK -->
+    <div id="sec-cash_bank" class="section">
+      <div class="row g-3"><div class="col-lg-8"><div class="card"><div class="card-header">Cash & Bank Accounts</div><div class="table-responsive"><table class="table"><thead><tr><th>Account</th><th>Type</th><th>Balance</th></tr></thead><tbody><tr><td>Cash</td><td><span class="badge bg-secondary">cash</span></td><td><strong>৳ 45,000</strong></td></tr><tr><td>DBBL Bank</td><td><span class="badge bg-secondary">bank</span></td><td><strong>৳ 32,300</strong></td></tr><tr><td>bKash</td><td><span class="badge bg-warning">mobile</span></td><td><strong>৳ 15,000</strong></td></tr></tbody></table></div></div><div class="card mt-3"><div class="card-header">Account Transfer (Not income/expense)</div><div class="card-body"><div class="row g-2"><div class="col-md-3"><select class="form-select"><option>Cash</option></select></div><div class="col-md-3"><select class="form-select"><option>DBBL Bank</option></select></div><div class="col-md-3"><input class="form-control" value="5000"></div><div class="col-md-3"><button class="btn btn-warning w-100">Transfer</button></div></div><div class="small text-muted mt-2">Transfer P/L e count hobena — double entry balanced.</div></div></div></div><div class="col-lg-4"><div class="card"><div class="card-header">Add Account</div><div class="card-body"><input class="form-control mb-2" placeholder="Name e.g. Nagad"><select class="form-select mb-2"><option>Cash</option><option>Bank</option><option>Mobile</option></select><input type="number" class="form-control mb-2" placeholder="Opening Balance" value="0"><button class="btn btn-primary w-100">Add</button></div></div></div></div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div id="sec-products" class="section">
+      <div class="row g-3"><div class="col-lg-8"><div class="card"><div class="card-header">Products & Inventory</div><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>SKU</th><th>Product</th><th>Stock</th><th>Price</th></tr></thead><tbody><tr class="table-warning"><td>SKU-001</td><td>A4 Paper Rim<br><small>pcs</small></td><td><span class="badge bg-danger">2</span> <i class="bi bi-exclamation-triangle text-danger"></i></td><td>৳ 450.00</td></tr><tr><td>SKU-002</td><td>Ink Cartridge</td><td><span class="badge bg-success">20</span></td><td>৳ 1,500.00</td></tr></tbody></table></div></div><div class="card mt-3"><div class="card-header">Stock Adjustment</div><div class="card-body"><div class="row g-2"><div class="col-md-4"><select class="form-select"><option>A4 Paper Rim (2)</option></select></div><div class="col-md-2"><select class="form-select"><option>Stock In</option><option>Stock Out</option></select></div><div class="col-md-2"><input class="form-control" value="10"></div><div class="col-md-4"><button class="btn btn-warning">Adjust</button></div></div></div></div></div><div class="col-lg-4"><div class="card"><div class="card-header">Add Product</div><div class="card-body"><input class="form-control mb-2" placeholder="Name"><input class="form-control mb-2" placeholder="SKU-003"><div class="row g-2"><div class="col-6"><input class="form-control mb-2" placeholder="Purchase" value="400"></div><div class="col-6"><input class="form-control mb-2" placeholder="Selling" value="450"></div></div><button class="btn btn-primary w-100">Add Product</button></div></div></div></div>
+    </div>
+
+    <!-- SALES -->
+    <div id="sec-sales" class="section">
+      <div class="d-flex justify-content-between mb-3"><h5>Sales</h5><button class="btn btn-primary" onclick="document.getElementById('saleForm').classList.toggle('d-none')"><i class="bi bi-plus-lg"></i> New Sale</button></div>
+      <div id="saleForm" class="card mb-3 d-none"><div class="card-header">New Sales Invoice (Multi-product)</div><div class="card-body"><div class="table-responsive"><table class="table"><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody><tr><td>A4 Paper Rim</td><td>5</td><td>450</td><td>2,250</td></tr><tr><td>Ink Cartridge</td><td>1</td><td>1,500</td><td>1,500</td></tr></tbody></table></div><div class="text-end">Subtotal 3,750 • Discount 0 • <strong>Total ৳ 3,750</strong> • Paid 2,000 • Due 1,750 • <span class="badge bg-warning">partial</span></div></div></div>
+      <div class="card"><div class="table-responsive"><table class="table"><thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Total</th><th>Due</th><th>Status</th></tr></thead><tbody><tr><td>INV-S-20241011-0001</td><td>Md Rahim</td><td>11/10/2024</td><td>৳ 3,750</td><td class="text-danger">৳ 1,750</td><td><span class="badge bg-warning">partial</span></td></tr></tbody></table></div></div>
+    </div>
+
+    <!-- PURCHASES -->
+    <div id="sec-purchases" class="section">
+      <div class="d-flex justify-content-between mb-3"><h5>Purchases</h5><button class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Purchase</button></div>
+      <div class="card"><div class="table-responsive"><table class="table"><thead><tr><th>Invoice</th><th>Supplier</th><th>Date</th><th>Total</th><th>Due</th></tr></thead><tbody><tr><td>INV-P-20241011-0001</td><td>Demo Supplier</td><td>11/10/2024</td><td>৳ 20,000</td><td class="text-danger">৳ 8,000</td></tr></tbody></table></div></div>
+    </div>
+
+    <!-- ACCOUNTS LEDGER -->
+    <div id="sec-accounts" class="section">
+      <div class="card"><div class="card-header">Accounts & Ledger — Cashbook</div><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Date</th><th>Txn No</th><th>Source</th><th>Type</th><th>Description</th><th class="text-end">Amount</th></tr></thead><tbody><tr><td>11/10/2024</td><td>TXN-20241011-0001</td><td>pcc#1</td><td><span class="badge bg-success">receivable</span></td><td>PCC Payment PCC-20241011-0001</td><td class="text-end">৳ 500.00</td></tr><tr><td>11/10/2024</td><td>TXN-20241011-0002</td><td>sale#1</td><td><span class="badge bg-success">receivable</span></td><td>Sales Revenue</td><td class="text-end">৳ 3,750.00</td></tr><tr><td>11/10/2024</td><td>TXN-20241011-0003</td><td>expense#1</td><td><span class="badge bg-secondary">expense</span></td><td>Office Rent</td><td class="text-end text-danger">৳ 12,000.00</td></tr></tbody></table></div><div class="card-footer small text-muted">Double-entry invariant: Σ debit = Σ credit per transaction</div></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="sec-reports" class="section">
+      <div class="row g-3">
+        <div class="col-md-4"><div class="card h-100"><div class="card-body text-center"><i class="bi bi-file-earmark-bar-graph fs-1 text-primary"></i><h6 class="mt-2">PCC Report</h6><a href="#" onclick="switchPage('pcc_reports')" class="btn btn-primary btn-sm">Open</a></div></div></div>
+        <div class="col-md-4"><div class="card h-100"><div class="card-body text-center"><i class="bi bi-graph-up fs-1 text-dark"></i><h6 class="mt-2">Profit & Loss</h6><p class="small text-muted">Service 2,000 - Govt 500 - Other 200 = 1,300</p><button class="btn btn-dark btn-sm" onclick="switchPage('reports_profit_inner')">Open P/L</button></div></div></div>
+        <div class="col-md-4"><div class="card h-100"><div class="card-body text-center"><i class="bi bi-box-seam fs-1 text-warning"></i><h6 class="mt-2">Stock Report</h6><p class="small">Valuation ৳ 48,000 • 3 low</p><button class="btn btn-warning btn-sm">Open</button></div></div></div>
+      </div>
+      <div id="reports_profit_inner" class="card mt-3"><div class="card-header">Profit & Loss — Unified (Demo 01-11 Oct 2024)</div><div class="card-body"><table class="table"><tr><th>Gross Receipts (Sales)</th><td class="text-end">৳ 3,42,000</td></tr><tr><th>Service Revenue (PCC)</th><td class="text-end text-success">৳ 1,20,000</td></tr><tr class="table-light"><th>Gross Income</th><th class="text-end">৳ 4,62,000</th></tr><tr><th>Direct Costs (Govt 40,000 + Other 8,500)</th><td class="text-end text-danger">৳ 48,500</td></tr><tr><th>Operating Expenses</th><td class="text-end text-danger">৳ 32,000</td></tr><tr class="table-warning"><th>Net Profit</th><th class="text-end text-success">৳ 3,81,500</th></tr></table><div class="alert alert-light border small">Prompt §8 validation: Service 2,000 - Govt 500 - Other 200 = 1,300 profit (only service counts as revenue).</div></div></div>
+    </div>
+
+    <!-- DRIVE -->
+    <div id="sec-drive" class="section">
+      <div class="card"><div class="card-header d-flex justify-content-between">Google Drive / Files <span class="badge bg-secondary">local mode</span></div><div class="card-body"><div class="alert alert-info small">Local <code>storage/uploads/</code> (auth-protected) — Drive API optional via <code>drive_mode=drive</code> + <code>storage/credentials/service-account.json</code> (scope <code>drive.file</code> only).</div><div class="table-responsive"><table class="table table-sm"><thead><tr><th>File</th><th>Case</th><th>Uploaded</th></tr></thead><tbody><tr><td>passport_rahim.pdf<br><small>245 KB • pdf</small></td><td>PCC-20241011-0001 — Md Rahim</td><td>11/10/2024 14:30</td></tr></tbody></table></div></div></div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div id="sec-activity" class="section">
+      <div class="card"><div class="card-header">Activity Log — last 200</div><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Module</th><th>Description</th></tr></thead><tbody><tr><td>11/10/2024 14:32</td><td>admin</td><td><span class="badge bg-secondary">create</span></td><td>pcc</td><td>Created PCC PCC-20241011-0001</td></tr><tr><td>11/10/2024 14:35</td><td>admin</td><td><span class="badge bg-secondary">status</span></td><td>pcc</td><td>Status Receive → SS Printed</td></tr><tr><td>11/10/2024 14:40</td><td>admin</td><td><span class="badge bg-secondary">create</span></td><td>sale</td><td>Sale INV-S-20241011-0001</td></tr></tbody></table></div></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="sec-settings" class="section">
+      <div class="row g-3"><div class="col-lg-8"><div class="card"><div class="card-header">Company & General</div><div class="card-body row g-2"><div class="col-md-6"><label class="form-label">Company Name</label><input class="form-control" value="SR Computer"></div><div class="col-md-6"><label class="form-label">Phone</label><input class="form-control" value="01700000000"></div><div class="col-md-3"><label class="form-label">Currency</label><input class="form-control" value="BDT"></div><div class="col-md-3"><label class="form-label">Date Format</label><select class="form-select"><option>d/m/Y</option><option>d-m-Y</option></select></div><div class="col-md-3"><label class="form-label">Fee Mode</label><select class="form-select"><option>Service only</option><option>Inclusive</option></select></div><div class="col-md-3"><label class="form-label">Status Strict</label><select class="form-select"><option>Permissive</option><option>Strict</option></select></div></div></div></div><div class="col-lg-4"><div class="card"><div class="card-header">Security</div><div class="card-body"><input type="password" class="form-control mb-2" placeholder="New Password"><div class="alert alert-light border small">Rate limit 5/15min • Session regenerate • CSRF • httponly cookies</div><button class="btn btn-primary w-100">Save Settings</button></div></div></div></div>
+    </div>
+
+    <!-- BACKUP -->
+    <div id="sec-backup" class="section">
+      <div class="row g-3"><div class="col-lg-5"><div class="card"><div class="card-header">Backup & Restore</div><div class="card-body"><p class="small text-muted">PDO dump — shared hosting compatible, no shell required. Stored in <code>storage/backups/</code> (.htaccess denied).</p><button class="btn btn-primary w-100"><i class="bi bi-cloud-arrow-down"></i> Create Backup Now</button><hr><input type="file" class="form-control mb-2"><button class="btn btn-warning w-100">Restore</button></div></div></div><div class="col-lg-7"><div class="card"><div class="card-header">Backup Logs</div><div class="table-responsive"><table class="table table-sm"><thead><tr><th>File</th><th>Size</th><th>Status</th></tr></thead><tbody><tr><td>backup_20241011_143000.sql.gz</td><td>245 KB</td><td><span class="badge bg-success">success</span></td></tr></tbody></table></div></div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const toggle=document.getElementById('toggleBtn');
+const sidebar=document.getElementById('sidebar');
+const overlay=document.getElementById('overlay');
+if(toggle){toggle.addEventListener('click',()=>{sidebar.classList.toggle('open');overlay.classList.toggle('show');});}
+overlay.addEventListener('click',()=>{sidebar.classList.remove('open');overlay.classList.remove('show');});
+function switchPage(p){
+  document.querySelectorAll('.nav-link').forEach(a=>a.classList.toggle('active',a.dataset.page===p));
+  document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id==='sec-'+p));
+  document.getElementById('pageTitle').textContent=document.querySelector(`[data-page="${p}"]`)?.textContent?.trim()||p;
+  sidebar.classList.remove('open');overlay.classList.remove('show');
+  window.scrollTo(0,0);
+  if(p==='dashboard') setTimeout(drawCharts,100);
+  if(p==='pcc_dashboard') setTimeout(drawMonthly,100);
+}
+document.querySelectorAll('.nav-link').forEach(a=>a.addEventListener('click',()=>switchPage(a.dataset.page)));
+function drawCharts(){
+  const c=document.getElementById('chartStatus');
+  if(c && !c._drawn){c._drawn=true; new Chart(c,{type:'bar',data:{labels:['Receive','SS Printed','Sign by SP/DC','MOFA','Ready','Delivered'],datasets:[{data:[320,210,180,95,142,301],backgroundColor:['#f59e0b','#3b82f6','#6366f1','#ec4899','#22c55e','#94a3b8']}]},options:{plugins:{legend:{display:false}}}});}
+}
+function drawMonthly(){
+  const m=document.getElementById('chartMonthly');
+  if(m && !m._drawn){m._drawn=true; new Chart(m,{type:'line',data:{labels:['2024-05','2024-06','2024-07','2024-08','2024-09','2024-10'],datasets:[{label:'Cases',data:[80,95,110,130,142,180],borderColor:'#0d6efd',tension:.3}]},options:{plugins:{legend:{display:false}}}});}
+}
+drawCharts();
+setInterval(()=>{document.getElementById('liveTime').textContent=new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Dhaka'})+' Dhaka';},1000);
+</script>
+</body>
+</html>

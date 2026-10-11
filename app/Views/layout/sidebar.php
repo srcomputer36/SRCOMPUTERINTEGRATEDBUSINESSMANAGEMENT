@@ -1,51 +1,68 @@
 <?php
 $current = $_GET['page'] ?? 'dashboard';
-function nav_active($page, $current){ return $page===$current ? 'active' : ''; }
-function nav_has($prefix, $current){ return str_starts_with($current, $prefix) ? 'active' : ''; }
+function isActive($pages,$cur){ return in_array($cur,(array)$pages)?'active':''; }
+function groupActive($prefix,$cur){ return str_starts_with($cur,$prefix)?'active':''; }
 $userName = e($_SESSION['username'] ?? 'Admin');
 ?>
 <nav id="sidebar" class="sidebar">
   <div class="brand">
-    <i class="bi bi-building"></i> <?= e(cfg('app.name') ?? 'SR Computer') ?>
-  </div>
-  <div class="px-2 py-2">
-    <!-- Main -->
-    <div class="nav-section">Main</div>
-    <a class="nav-link <?= nav_active('dashboard',$current) ?>" href="index.php?page=dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-    <a class="nav-link <?= nav_active('pcc_dashboard',$current) ?>" href="index.php?page=pcc_dashboard"><i class="bi bi-shield-check"></i> PCC Overview</a>
-
-    <div class="nav-section">Police Clearance</div>
-    <a class="nav-link <?= nav_has('pcc',$current) && $current!=='pcc_dashboard' ? '' : '' ?> <?= in_array($current,['pcc_list','pcc_view','pcc_receive','pcc_edit'])?'active':'' ?>" href="index.php?page=pcc_list"><i class="bi bi-folder2-open"></i> All Cases / Records</a>
-    <a class="nav-link <?= nav_active('pcc_receive',$current) ?>" href="index.php?page=pcc_receive"><i class="bi bi-plus-circle"></i> Receive New Case</a>
-    <a class="nav-link <?= nav_active('pcc_reports',$current) ?>" href="index.php?page=pcc_reports"><i class="bi bi-file-earmark-bar-graph"></i> PCC Reports</a>
-
-    <div class="nav-section">Business Management</div>
-    <a class="nav-link <?= nav_active('business_dashboard',$current) ?>" href="index.php?page=business_dashboard"><i class="bi bi-graph-up"></i> Business Dashboard</a>
-    <a class="nav-link <?= nav_active('customers',$current) ?>" href="index.php?page=customers"><i class="bi bi-people"></i> Customers</a>
-    <a class="nav-link <?= nav_active('suppliers',$current) ?>" href="index.php?page=suppliers"><i class="bi bi-truck"></i> Suppliers</a>
-    <a class="nav-link <?= nav_active('income_expenses',$current) ?>" href="index.php?page=income_expenses"><i class="bi bi-cash-stack"></i> Income & Expenses</a>
-    <a class="nav-link <?= nav_active('cash_bank',$current) ?>" href="index.php?page=cash_bank"><i class="bi bi-bank"></i> Cash & Bank</a>
-    <a class="nav-link <?= nav_active('products',$current) ?>" href="index.php?page=products"><i class="bi bi-box-seam"></i> Products & Inventory</a>
-    <a class="nav-link <?= nav_active('sales',$current) ?>" href="index.php?page=sales"><i class="bi bi-receipt"></i> Sales</a>
-    <a class="nav-link <?= nav_active('purchases',$current) ?>" href="index.php?page=purchases"><i class="bi bi-bag-plus"></i> Purchases</a>
-
-    <div class="nav-section">Accounts & System</div>
-    <a class="nav-link <?= nav_active('accounts',$current) ?>" href="index.php?page=accounts"><i class="bi bi-journal-text"></i> Accounts & Ledger</a>
-    <a class="nav-link <?= nav_active('reports',$current) ?>" href="index.php?page=reports"><i class="bi bi-bar-chart-line"></i> Reports</a>
-    <a class="nav-link <?= nav_active('drive',$current) ?>" href="index.php?page=drive"><i class="bi bi-google"></i> Drive / Files</a>
-    <a class="nav-link <?= nav_active('activity',$current) ?>" href="index.php?page=activity"><i class="bi bi-clock-history"></i> Activity Log</a>
-    <a class="nav-link <?= nav_active('settings',$current) ?>" href="index.php?page=settings"><i class="bi bi-gear"></i> Settings</a>
-    <a class="nav-link <?= nav_active('backup',$current) ?>" href="index.php?page=backup"><i class="bi bi-cloud-arrow-down"></i> Backup & Restore</a>
-
-    <div class="mt-4 px-3">
-      <div class="d-flex align-items-center gap-2 text-white-50 small">
-        <i class="bi bi-person-circle"></i> <?= $userName ?>
-      </div>
-      <a href="logout.php" class="btn btn-sm btn-outline-light w-100 mt-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    <div class="brand-icon">SR</div>
+    <div style="line-height:1.2">
+      <div style="font-weight:800;font-size:14px">SR Computer</div>
+      <div style="font-size:10px;color:#94a3b8;letter-spacing:.06em">INTEGRATED BUSINESS</div>
     </div>
-    <div class="mt-3 px-3 small text-white-50">
-      <div>SR Computer © <?= date('Y') ?></div>
-      <div style="opacity:.6">Integrated Business</div>
+    <span style="margin-left:auto;background:#1e293b;padding:3px 7px;border-radius:999px;font-size:10px">v2</span>
+  </div>
+  <div style="padding:12px">
+    <!-- Main -->
+    <div class="nav-section">প্রধান — Main</div>
+    <a class="nav-link <?= isActive(['dashboard'],$current) ?>" href="index.php?page=dashboard"><i class="bi bi-grid"></i> ড্যাশবোর্ড</a>
+
+    <!-- PCC Group -->
+    <div class="nav-section" style="cursor:pointer" onclick="document.getElementById('grp-pcc').classList.toggle('d-none')">
+      পুলিশ ক্লিয়ারেন্স <i class="bi bi-chevron-down" style="font-size:10px;float:right;margin-top:4px"></i>
+    </div>
+    <div id="grp-pcc">
+      <a class="nav-link <?= isActive(['pcc_dashboard'],$current) ?>" href="index.php?page=pcc_dashboard"><i class="bi bi-shield-check"></i> PCC Overview</a>
+      <a class="nav-link <?= isActive(['pcc_list','pcc_view','pcc_edit'],$current) ?>" href="index.php?page=pcc_list"><i class="bi bi-folder2-open"></i> সকল কেস</a>
+      <a class="nav-link <?= isActive(['pcc_receive'],$current) ?>" href="index.php?page=pcc_receive"><i class="bi bi-plus-circle"></i> নতুন কেস</a>
+      <a class="nav-link <?= isActive(['pcc_reports','reports_pcc'],$current) ?>" href="index.php?page=pcc_reports"><i class="bi bi-file-earmark-bar-graph"></i> PCC রিপোর্ট</a>
+    </div>
+
+    <!-- Business Group -->
+    <div class="nav-section" style="cursor:pointer" onclick="document.getElementById('grp-biz').classList.toggle('d-none')">
+      ব্যবসা — Business <i class="bi bi-chevron-down" style="font-size:10px;float:right;margin-top:4px"></i>
+    </div>
+    <div id="grp-biz">
+      <a class="nav-link <?= isActive(['business_dashboard'],$current) ?>" href="index.php?page=business_dashboard"><i class="bi bi-graph-up"></i> Business Dashboard</a>
+      <a class="nav-link <?= isActive(['customers','customers_view'],$current) ?>" href="index.php?page=customers"><i class="bi bi-people"></i> কাস্টমার</a>
+      <a class="nav-link <?= isActive(['suppliers','suppliers_view'],$current) ?>" href="index.php?page=suppliers"><i class="bi bi-truck"></i> সাপ্লায়ার</a>
+      <a class="nav-link <?= isActive(['products'],$current) ?>" href="index.php?page=products"><i class="bi bi-box-seam"></i> প্রোডাক্ট & স্টক</a>
+      <a class="nav-link <?= isActive(['sales','sales_create','sales_view'],$current) ?>" href="index.php?page=sales"><i class="bi bi-receipt"></i> বিক্রয়</a>
+      <a class="nav-link <?= isActive(['purchases','purchases_create','purchases_view'],$current) ?>" href="index.php?page=purchases"><i class="bi bi-bag-plus"></i> ক্রয়</a>
+      <a class="nav-link <?= isActive(['cash_bank'],$current) ?>" href="index.php?page=cash_bank"><i class="bi bi-bank"></i> ক্যাশ & ব্যাংক</a>
+      <a class="nav-link <?= isActive(['income_expenses'],$current) ?>" href="index.php?page=income_expenses"><i class="bi bi-cash-stack"></i> আয়-ব্যয়</a>
+    </div>
+
+    <!-- System Group -->
+    <div class="nav-section" style="cursor:pointer" onclick="document.getElementById('grp-sys').classList.toggle('d-none')">
+      হিসাব & সিস্টেম <i class="bi bi-chevron-down" style="font-size:10px;float:right;margin-top:4px"></i>
+    </div>
+    <div id="grp-sys">
+      <a class="nav-link <?= isActive(['accounts','reports','reports_cashbook','reports_stock','reports_sales','reports_profit'],$current) ?>" href="index.php?page=accounts"><i class="bi bi-journal-text"></i> লেজার</a>
+      <a class="nav-link <?= isActive(['reports'],$current) ?>" href="index.php?page=reports"><i class="bi bi-bar-chart-line"></i> রিপোর্টস</a>
+      <a class="nav-link <?= isActive(['drive'],$current) ?>" href="index.php?page=drive"><i class="bi bi-google"></i> ফাইলস</a>
+      <a class="nav-link <?= isActive(['activity'],$current) ?>" href="index.php?page=activity"><i class="bi bi-clock-history"></i> Activity Log</a>
+      <a class="nav-link <?= isActive(['settings'],$current) ?>" href="index.php?page=settings"><i class="bi bi-gear"></i> সেটিংস</a>
+      <a class="nav-link <?= isActive(['backup'],$current) ?>" href="index.php?page=backup"><i class="bi bi-cloud-arrow-down"></i> ব্যাকআপ</a>
+    </div>
+
+    <div style="margin-top:16px;padding:12px;background:#1e293b;border-radius:12px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px"><?= strtoupper(substr($userName,0,2)) ?></div>
+        <div><div style="font-size:12px;font-weight:600"><?= $userName ?></div><div style="font-size:10px;color:#94a3b8">অ্যাডমিন</div></div>
+      </div>
+      <a href="logout.php" style="display:block;margin-top:10px;background:#4f46e5;color:#fff;text-align:center;padding:7px;border-radius:8px;font-size:12px;font-weight:600"><i class="bi bi-box-arrow-right"></i> লগআউট</a>
     </div>
   </div>
 </nav>

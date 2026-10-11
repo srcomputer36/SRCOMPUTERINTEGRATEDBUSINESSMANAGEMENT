@@ -80,48 +80,44 @@ function require_login() {
     }
 }
 
-// Generate unique tracking/invoice/txn numbers safely with table lock
+// Generate unique tracking/invoice/txn numbers safely — nested-transaction safe (fixes sales entry bug)
 function next_seq(PDO $pdo, string $key, int $pad=4): int {
-    // Ensure key exists
     $pdo->prepare("INSERT IGNORE INTO settings (`key`, value) VALUES (?, '0')")->execute([$key]);
-    $pdo->beginTransaction();
+    $wasInTxn = $pdo->inTransaction();
+    if (!$wasInTxn) $pdo->beginTransaction();
     try {
         $stmt = $pdo->prepare("SELECT value FROM settings WHERE `key`=? FOR UPDATE");
         $stmt->execute([$key]);
         $val = (int)$stmt->fetchColumn();
         $next = $val + 1;
         $pdo->prepare("UPDATE settings SET value=? WHERE `key`=?")->execute([(string)$next, $key]);
-        $pdo->commit();
+        if (!$wasInTxn) $pdo->commit();
         return $next;
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
+        if (!$wasInTxn && $pdo->inTransaction()) $pdo->rollBack();
         throw $e;
     }
 }
 function generate_tracking_id(PDO $pdo): string {
-    // If legacy max exists, ensure seq at least max
     try {
         $pdo->exec("INSERT IGNORE INTO settings (`key`, value) VALUES ('tracking_seq','0')");
-        // Check max legacy seq
-        $maxStmt = $pdo->query("SELECT MAX(CAST(SUBSTRING(tracking_id, 14) AS UNSIGNED)) FROM pcc_cases WHERE tracking_id LIKE 'PCC-%'");
-        $max = (int)$maxStmt->fetchColumn();
-        $seqStmt = $pdo->prepare("SELECT value FROM settings WHERE `key`='tracking_seq' FOR UPDATE");
-        // We'll do transaction inside next_seq but need to bump if max > seq
-        // Simpler: just use next_seq and if result <= max, bump again
-        $pdo->beginTransaction();
-        $pdo->query("SELECT value FROM settings WHERE `key`='tracking_seq' FOR UPDATE");
-        $cur = (int)$pdo->query("SELECT value FROM settings WHERE `key`='tracking_seq'")->fetchColumn();
+        try { $max = (int)$pdo->query("SELECT MAX(CAST(SUBSTRING(tracking_id, 14) AS UNSIGNED)) FROM pcc_cases WHERE tracking_id LIKE 'PCC-%'")->fetchColumn(); } catch(Exception $e){ $max=0; }
+        $wasInTxn = $pdo->inTransaction();
+        if (!$wasInTxn) $pdo->beginTransaction();
+        // lock row
+        $stmt = $pdo->prepare("SELECT value FROM settings WHERE `key`='tracking_seq' FOR UPDATE");
+        $stmt->execute();
+        $cur = (int)$stmt->fetchColumn();
         if ($cur < $max) {
             $pdo->prepare("UPDATE settings SET value=? WHERE `key`='tracking_seq'")->execute([(string)$max]);
             $cur = $max;
         }
         $next = $cur + 1;
         $pdo->prepare("UPDATE settings SET value=? WHERE `key`='tracking_seq'")->execute([(string)$next]);
-        $pdo->commit();
+        if (!$wasInTxn) $pdo->commit();
         return 'PCC-' . date('Ymd') . '-' . str_pad($next, 4, '0', STR_PAD_LEFT);
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-        // fallback to time-based
+        if (isset($wasInTxn) && !$wasInTxn && $pdo->inTransaction()) $pdo->rollBack();
         return 'PCC-' . date('Ymd') . '-' . str_pad(random_int(1,9999),4,'0',STR_PAD_LEFT);
     }
 }
@@ -129,32 +125,36 @@ function generate_invoice_no(PDO $pdo, string $type='sale'): string {
     $key = $type === 'sale' ? 'invoice_seq_sale' : 'invoice_seq_purchase';
     $prefix = $type === 'sale' ? 'INV-S-' : 'INV-P-';
     $pdo->prepare("INSERT IGNORE INTO settings (`key`, value) VALUES (?, '0')")->execute([$key]);
-    // Use next_seq helper without nested txn issue — replicate logic
-    $pdo->beginTransaction();
+    $wasInTxn = $pdo->inTransaction();
+    if (!$wasInTxn) $pdo->beginTransaction();
     try {
         $s = $pdo->prepare("SELECT value FROM settings WHERE `key`=? FOR UPDATE");
         $s->execute([$key]);
         $val = (int)$s->fetchColumn();
         $next = $val + 1;
         $pdo->prepare("UPDATE settings SET value=? WHERE `key`=?")->execute([(string)$next, $key]);
-        $pdo->commit();
+        if (!$wasInTxn) $pdo->commit();
         return $prefix . date('Ymd') . '-' . str_pad($next, 4, '0', STR_PAD_LEFT);
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
+        if (!$wasInTxn && $pdo->inTransaction()) $pdo->rollBack();
         return $prefix . date('Ymd') . '-' . rand(1000,9999);
     }
 }
 function generate_txn_no(PDO $pdo): string {
     $key='txn_seq';
     $pdo->prepare("INSERT IGNORE INTO settings (`key`, value) VALUES (?, '0')")->execute([$key]);
-    $pdo->beginTransaction();
+    $wasInTxn = $pdo->inTransaction();
+    if (!$wasInTxn) $pdo->beginTransaction();
     try {
         $s=$pdo->prepare("SELECT value FROM settings WHERE `key`=? FOR UPDATE");
         $s->execute([$key]);
         $val=(int)$s->fetchColumn();
         $next=$val+1;
         $pdo->prepare("UPDATE settings SET value=? WHERE `key`=?")->execute([(string)$next,$key]);
-        $pdo->commit();
+        if (!$wasInTxn) $pdo->commit();
         return 'TXN-' . date('Ymd') . '-' . str_pad($next,4,'0',STR_PAD_LEFT);
-    } catch(Exception $e){ if($pdo->inTransaction()) $pdo->rollBack(); return 'TXN-'.date('Ymd').'-'.rand(1000,9999); }
+    } catch(Exception $e){
+        if (!$wasInTxn && $pdo->inTransaction()) $pdo->rollBack();
+        return 'TXN-'.date('Ymd').'-'.rand(1000,9999);
+    }
 }
